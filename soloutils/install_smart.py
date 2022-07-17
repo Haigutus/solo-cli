@@ -24,19 +24,19 @@ echo 'smart package manager is now ready to use.'
 """
 
 def main(args):
-    print 'NOTE: this process requires simultaneous access to'
-    print 'Solo and to the Internet. if you have not yet done so,'
-    print 'run `solo wifi` to connect to Solo and to a local'
-    print 'wifi connection simultaneously.'
-    print ''
+    print('NOTE: this process requires simultaneous access to')
+    print('Solo and to the Internet. if you have not yet done so,')
+    print('run `solo wifi` to connect to Solo and to a local')
+    print('wifi connection simultaneously.')
+    print('')
 
-    print 'connecting to solo...'
-    solo = soloutils.connect_solo(await=True)
+    print('connecting to solo...')
+    solo = soloutils.connect_solo(wait=True)
 
-    print 'waiting for Internet connectivity...'
+    print('waiting for Internet connectivity...')
     soloutils.await_net()
 
-    print ''
+    print('')
     code = soloutils.command_stream(solo, SCRIPT)
     solo.close()
     sys.exit(code)

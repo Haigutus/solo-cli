@@ -1,16 +1,16 @@
-import flash
-import wifi
-import info
-import provision
+from . import flash
+from . import wifi
+from . import info
+from . import provision
 import soloutils
-import logs
-import install_pip
-import install_smart
-import install_runit
-import resize
-import script
-import video
-import pack
+from . import logs
+from . import install_pip
+from . import install_smart
+from . import install_runit
+from . import resize
+from . import script
+from . import video
+from . import pack
 
 import sys
 import paramiko
@@ -18,10 +18,11 @@ import time
 import socket
 import os
 import tempfile
-import urlparse
-import urllib2
+import urllib.parse
+import urllib.request, urllib.error, urllib.parse
 
-def _connect(ip, await=True, silent=False):
+
+def _connect(ip, wait=True, silent=False):
     client = paramiko.SSHClient()
     client.load_system_host_keys()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -33,18 +34,18 @@ def _connect(ip, await=True, silent=False):
         try:
             client.connect(ip, username='root', password='TjSDBkAu', timeout=5)
         except paramiko.BadHostKeyException:
-            print 'error: {} has an incorrect entry in ~/.ssh/known_hosts. please run:'.format(ip)
-            print ''
-            print '    ssh-keygen -R {}'.format(ip)
-            print ''
-            print 'and try again'
+            print(('error: {} has an incorrect entry in ~/.ssh/known_hosts. please run:'.format(ip)))
+            print('')
+            print(('    ssh-keygen -R {}'.format(ip)))
+            print('')
+            print('and try again')
             sys.exit(1)
         except Exception as e:
-            if not await:
+            if not wait:
                 raise e
             if not message and time.time() - start > 5:
                 message = True
-                print '(note: ensure you are connected to Solo\'s wifi network.)'
+                print('(note: ensure you are connected to Solo\'s wifi network.)')
             client.close()
             continue
         time.sleep(1)
@@ -53,11 +54,14 @@ def _connect(ip, await=True, silent=False):
 
     return client
 
-def connect_controller(await=True, silent=False):
-    return _connect('10.1.1.1', await=await, silent=silent)
 
-def connect_solo(await=True, silent=False):
-    return _connect('10.1.1.10', await=await, silent=silent)
+def connect_controller(wait=True, silent=False):
+    return _connect('10.1.1.1', wait=wait, silent=silent)
+
+
+def connect_solo(wait=True, silent=False):
+    return _connect('10.1.1.10', wait=wait, silent=silent)
+
 
 def command_stream(client, cmd, stdout=sys.stdout, stderr=sys.stderr):
     chan = client.get_transport().open_session()
@@ -79,9 +83,11 @@ def command_stream(client, cmd, stdout=sys.stdout, stderr=sys.stderr):
     chan.close()
     return code
 
+
 def command_blind(client, cmd):
     chan = client.get_transport().open_session()
     chan.exec_command(cmd)
+
 
 def command(client, cmd):
     chan = client.get_transport().open_session()
@@ -100,28 +106,33 @@ def command(client, cmd):
     chan.close()
     return code, stdout, stderr
 
+
 def controller_versions(controller):
     code, controller_str, stderr = soloutils.command(controller, 'cat /VERSION')
-    version, ref = controller_str.strip().split()
+    data = controller_str.strip().split()
     return {
-        "version": version,
-        "ref": ref,
+        "version": data[0],
+        "ref": data[1],
+        "date": data[-1]
     }
+
 
 def solo_versions(solo):
     code, solo_str, stderr = soloutils.command(solo, 'cat /VERSION')
-    version, ref = solo_str.strip().split()
+    data = solo_str.strip().split()
     return {
-        "version": version,
-        "ref": ref,
+        "version": data[0],
+        "ref": data[1],
+        "date": data[-1]
     }
+
 
 def gimbal_versions(solo):
     code, gimbal_str, stderr = soloutils.command(solo, 'cat /AXON_VERSION')
     try:
-        version, = gimbal_str.strip().split()
+        data = gimbal_str.strip().split()
         return {
-            "version": version,
+            "version": data[0],
             "connected": True,
         }
     except:
@@ -129,27 +140,33 @@ def gimbal_versions(solo):
             "connected": False,
         }
 
+
 def pixhawk_versions(solo):
     code, pixhawk_str, stderr = soloutils.command(solo, 'cat /PIX_VERSION')
-    version, apm_ref, px4firmware_ref, px4nuttx_ref = pixhawk_str.strip().split()
+    data = pixhawk_str.strip().split()
     return {
-        "version": version,
-        "apm_ref": apm_ref,
-        "px4firmware_ref": px4firmware_ref,
-        "px4nuttx_ref": px4nuttx_ref,
+        "version": data[0],
+        "apm_ref": data[1],
+        "px4firmware_ref": data[2],
+        "px4nuttx_ref": data[3],
     }
+
 
 def settings_reset(target):
     code = soloutils.command_stream(target, 'sololink_config --settings-reset')
     if code != 0:
-        code = soloutils.command_stream(target, 'mkdir -p /log/updates && touch /log/updates/RESETSETTINGS && shutdown -r now')
+        code = soloutils.command_stream(target,
+                                        'mkdir -p /log/updates && touch /log/updates/RESETSETTINGS && shutdown -r now')
     return code == 0
+
 
 def factory_reset(target):
     code = soloutils.command_stream(target, 'sololink_config --factory-reset')
     if code != 0:
-        code = soloutils.command_stream(target, 'mkdir -p /log/updates && touch /log/updates/FACTORYRESET && shutdown -r now')
+        code = soloutils.command_stream(target,
+                                        'mkdir -p /log/updates && touch /log/updates/FACTORYRESET && shutdown -r now')
     return code == 0
+
 
 def await_net():
     socket.setdefaulttimeout(5)
@@ -163,8 +180,8 @@ def await_net():
             continue
 
         try:
-            request = urllib2.Request('http://example.com/')
-            urllib2.urlopen(request)
+            request = urllib.request.Request('http://example.com/')
+            urllib.request.urlopen(request)
         except KeyboardInterrupt as e:
             raise e
         except Exception as e:

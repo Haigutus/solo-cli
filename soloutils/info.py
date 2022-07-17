@@ -7,10 +7,10 @@ import soloutils
 from datetime import datetime, timedelta
 
 def main(args):
-    print 'connecting to Solo and the Controller...'
+    print('connecting to Solo and the Controller...')
 
-    controller = soloutils.connect_controller(await=True)
-    solo = soloutils.connect_solo(await=True)
+    controller = soloutils.connect_controller(wait=True)
+    solo = soloutils.connect_solo(wait=True)
 
     data = {}
     data['solo'] = soloutils.solo_versions(solo)
@@ -18,4 +18,4 @@ def main(args):
     data['gimbal'] = soloutils.gimbal_versions(solo)
     data['controller'] = soloutils.controller_versions(controller)
 
-    print json.dumps(data, indent=2, sort_keys=True)
+    print((json.dumps(data, indent=2, sort_keys=True)))

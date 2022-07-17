@@ -6,9 +6,9 @@ on the internet connection and the number of components on the Solo/Artoo
 that require updating.
 """
 
-from __future__ import print_function
+
 from datetime import datetime, timedelta
-import sys, urllib2, re, urlparse, soloutils, time, base64
+import sys, urllib.request, urllib.error, urllib.parse, re, urllib.parse, soloutils, time, base64
 import socket
 import posixpath
 import hashlib
@@ -34,13 +34,13 @@ class FirmwareRelease(object):
         self.product = json['product']
 
 def openurl(url):
-    request = urllib2.Request(url)
+    request = urllib.request.Request(url)
     request.add_header('Authorization', 'Token ' + TOKEN)
-    return urllib2.urlopen(request)
+    return urllib.request.urlopen(request)
 
 def releases(product, channels):
     results = []
-    url = urlparse.urljoin(SERVERADDR, 'releases/')
+    url = urllib.parse.urljoin(SERVERADDR, 'releases/')
     while True:
         parsed = json.loads(openurl(url).read())
         results += parsed['results']
@@ -48,7 +48,7 @@ def releases(product, channels):
             url = parsed['next']
         else:
             break
-    return sorted(filter(lambda x: x.product in product and (x.channel in channels if ('SOLO_UNFILTERED_UPDATES' in os.environ) else x.channel == 1), map(FirmwareRelease, results)), key=lambda x: LooseVersion(x.version))
+    return sorted([x for x in map(FirmwareRelease, results) if x.product in product and (x.channel in channels if ('SOLO_UNFILTERED_UPDATES' in os.environ) else x.channel == 1)], key=lambda x: LooseVersion(x.version))
 
 def fetch(release):
     import requests
@@ -84,8 +84,8 @@ def fetch(release):
     f2.close()
 
     if release.md5 != sig.hexdigest():
-        errprinter('expected md5 of {}, received file with md5 of {}'.format(md5, sig.hexdigest()))
-        errprinter('please check the file {}'.format(url))
+        errprinter('expected md5 of {}, received file with md5 of {}'.format(release.md5, sig.hexdigest()))
+        errprinter('please check the file {}'.format(release.url))
         errprinter('and try again.')
         sys.exit(1)
 
@@ -93,7 +93,7 @@ def fetch(release):
 
 def list():
     errprinter('checking Internet connectivity...')
-    soloutils.await_net()
+    soloutils.wait_net()
 
     controller = releases([1, 10], [1, 7])
     drone = releases([2, 9], [1, 7])
@@ -116,9 +116,9 @@ def clean_settings(args):
     print('connecting to {}...'.format(group))
 
     if args['drone'] or args['both']:
-        solo = soloutils.connect_solo(await=True)
+        solo = soloutils.connect_solo(wait=True)
     if args['controller'] or args['both']:
-        controller = soloutils.connect_controller(await=True)
+        controller = soloutils.connect_controller(wait=True)
 
     if args['drone'] or args['both']:
         soloutils.settings_reset(solo)
@@ -148,9 +148,9 @@ def factory_reset(args):
     print('connecting to {}...'.format(group))
 
     if args['drone'] or args['both']:
-        solo = soloutils.connect_solo(await=True)
+        solo = soloutils.connect_solo(wait=True)
     if args['controller'] or args['both']:
-        controller = soloutils.connect_controller(await=True)
+        controller = soloutils.connect_controller(wait=True)
 
     if args['drone'] or args['both']:
         soloutils.factory_reset(solo)
@@ -173,10 +173,10 @@ def flash(target, firmware_file, firmware_md5, args):
     # Connect to controller...
     if target == 'controller':
         errprinter('connecting to Controller...')
-        client = soloutils.connect_controller(await=True)
+        client = soloutils.connect_controller(wait=True)
     else:
         errprinter('connecting to Solo...')
-        client = soloutils.connect_solo(await=True)
+        client = soloutils.connect_solo(wait=True)
 
     # Prepare the update.
     # older versions don't have sololink_config and ssh returns 127, so do it manually
@@ -223,7 +223,7 @@ def flash(target, firmware_file, firmware_md5, args):
 
 def flash_px4(firmware_file):
     errprinter('connecting to Solo...')
-    client = soloutils.connect_solo(await=True)
+    client = soloutils.connect_solo(wait=True)
     soloutils.command_stream(client, 'rm -rf /firmware/loaded')
 
     # Upload the files.
@@ -254,12 +254,13 @@ def download_firmware(target, version):
     updates = releases(product, [1, 7])
 
     if version:
-        updates = filter(lambda x: version in re.sub('.tar.gz', '', x.url.split('/')[-1]), updates)
+        updates = [x for x in updates if version in re.sub('.tar.gz', '', x.url.split('/')[-1])]
         if len(updates) == 0:
             errprinter('error: no version matching {} were found.'.format(version))
             sys.exit(1)
 
     return fetch(updates[-1])
+
 
 def main(args):
     if args['--list']:
@@ -270,7 +271,7 @@ def main(args):
         if args['<filename>']:
             firmware_file = args['<filename>']
             flash_px4(firmware_file)
-    	return
+        return
 
     if args['both']:
         group = 'Solo and the Controller'
@@ -308,7 +309,7 @@ def main(args):
         errprinter('this PRESERVES ALL LOCAL CHANGES to Solo, but any conflicts')
         errprinter('with newer updates is not guaranteed to work.')
 
-    y = raw_input('proceed to perform update? [y/N] ')
+    y = input('proceed to perform update? [y/N] ')
     if not (y.lower() == 'y' or y.lower() == 'yes'):
         sys.exit(1)
 

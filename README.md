@@ -12,7 +12,7 @@ To install solo-cli, run:
 
 ```
 sudo pip uninstall solo-cli -y || true
-sudo pip install https://github.com/3drobotics/solo-cli/archive/master.zip --no-cache-dir
+sudo pip install https://github.com/Haigutus/solo-cli/archive/master.zip --no-cache-dir
 ```
 
 Your Computer will now have a `solo` command line tool. Read on for what commands are available.

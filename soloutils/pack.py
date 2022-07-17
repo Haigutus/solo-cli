@@ -27,7 +27,7 @@ def spew_string_to_tmpscript(string):
 
     tmp = tempfile.NamedTemporaryFile(mode='w+b', delete=False,suffix=mysuffix)
     if not is_win():
-        os.chmod(tmp.name, 0700)
+        os.chmod(tmp.name, 0o700)
     tmp.write(string)
     tmp.close()
 
@@ -65,7 +65,7 @@ cd {windows_drive_change} "{basedir}"
            windows_drive_change=windows_drive_change)
 
     path = spew_string_to_tmpscript(content)
-    print("script is at %s" % (path,))
+    print(("script is at %s" % (path,)))
 
     # run the script...
     subprocess.call(path)
@@ -87,7 +87,7 @@ def find_site_packages_directory(startdir):
     raise Exception("site-packages not found in (%s)" % (startdir,))
 
 def main(args):
-    print 'Creating script archive...'
+    print('Creating script archive...')
 
     # use a temporary directory to hold a copy of the content to be archived:
     tmpdir = tempfile.mkdtemp()
@@ -115,14 +115,14 @@ def main(args):
 
     site_packages_directory = find_site_packages_directory(envdir)
     # write out a configuration script:
-    print("site packages directory: %s" % (site_packages_directory,))
+    print(("site packages directory: %s" % (site_packages_directory,)))
     write_distutils_pth(os.path.join(site_packages_directory, 'distutils.pth'))
 
     run_in_env(contentdir, "pip install wheel")
     run_in_env(contentdir, "pip wheel -r requirements.txt -w wheelhouse")
 
     tarball_name = "solo-script.tar.gz"
-    print("Creating tarball (%s)" % tarball_name)
+    print(("Creating tarball (%s)" % tarball_name))
     tarball = tarfile.open(name=tarball_name, mode="w:gz")
     tarball.add(contentdir,
                 recursive=True,

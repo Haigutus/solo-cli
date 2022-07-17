@@ -1,4 +1,8 @@
-import paramiko, base64, time, sys, soloutils
+import paramiko
+import base64
+import time
+import sys
+import soloutils
 from distutils.version import LooseVersion
 
 # This script operates in two stages: creating the script file
@@ -128,49 +132,49 @@ bash /tmp/setupwifi.sh > /log/setupwifi.log 2>&1
 """
 
 def main(args):
-    print 'connecting to the Controller...'
-    controller = soloutils.connect_controller(await=True)
+    print('connecting to the Controller...')
+    controller = soloutils.connect_controller(wait=True)
 
     controller_version = soloutils.controller_versions(controller)['version']
     if LooseVersion('1.2.0') > LooseVersion(controller_version):
-        print 'error: expecting version to be >= 1.2.0'
-        print 'your Controller version: {}'.format(controller_version)
-        print 'please flash your Controller with a newer version to run this command.'
-        print ''
-        print '    solo update solo latest'
-        print '    solo update controller latest'
+        print('error: expecting version to be >= 1.2.0')
+        print('your Controller version: {}'.format(controller_version))
+        print('please flash your Controller with a newer version to run this command.')
+        print('')
+        print('    solo update solo latest')
+        print('    solo update controller latest')
         sys.exit(1)
 
-    print ''
+    print('')
     if args['--password']:
-        print 'connecting to encrypted wifi network.'
+        print('connecting to encrypted wifi network.')
         credentials = 'ssid="{ssid}"\npsk="{password}"'.format(ssid=args['--name'], password=args['--password'])
     else:
-        print 'connecting to wifi network with NO password.'
+        print('connecting to wifi network with NO password.')
         credentials = 'ssid="{ssid}"\nkey_mgmt=NONE'.format(ssid=args['--name'])
-    print '(your computer may disconnect from Solo\'s network.)'
+    print('(your computer may disconnect from Solo\'s network.)')
 
-    controller = soloutils.connect_controller(await=True)
+    controller = soloutils.connect_controller(wait=True)
     code = soloutils.command_blind(controller, SCRIPT.format(credentials=credentials))
     time.sleep(8)
     controller.close()
 
-    print ''
-    print 'please manually reconnect to Solo\'s network once it becomes available.'
-    print 'it may take up to 30s to a reconnect to succeed.'
-    controller = soloutils.connect_controller(await=True, silent=True)
-    print ''
+    print('')
+    print('please manually reconnect to Solo\'s network once it becomes available.')
+    print('it may take up to 30s to a reconnect to succeed.')
+    controller = soloutils.connect_controller(wait=True, silent=True)
+    print('')
     code = soloutils.command_stream(controller, 'cat /log/setupwifi.log')
     controller.close()
 
     try:
-        drone = soloutils.connect_solo(await=False)
-        print '(resetting Solo\'s DNS...',
+        drone = soloutils.connect_solo(wait=False)
+        print('(resetting Solo\'s DNS...', end=' ')
         sys.stdout.flush()
         soloutils.command(drone, 'ifdown wlan0; ifdown -a; ifup -a; ifup wlan0')
         time.sleep(4)
         drone.close()
-        print ' done.)'
+        print(' done.)')
     except:
         pass
 

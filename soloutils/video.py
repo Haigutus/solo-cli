@@ -31,8 +31,8 @@ echo '/dev/video0 reclaimed for the video downlink.'
 """
 
 def main(args):
-    print 'connecting to solo...'
-    solo = soloutils.connect_solo(await=True)
+    print('connecting to solo...')
+    solo = soloutils.connect_solo(wait=True)
 
     if args['acquire']:
         code = soloutils.command_stream(solo, ACQUIRE)

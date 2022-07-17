@@ -5,7 +5,7 @@ import sys
 # align_channel.py 3DR
 
 if len(sys.argv) < 2:
-    print 'Usage: align_channel.py <ssid>'
+    print('Usage: align_channel.py <ssid>')
     sys.exit(1)
 
 def build_tree(data):
@@ -42,11 +42,11 @@ def build_tree(data):
 input = subprocess.check_output('iw dev wlan0 scan ap-force', shell=True)
 networks = []
 for entry in build_tree(input):
-    if not isinstance(entry, basestring):
+    if not isinstance(entry, str):
         ssid = None
         freq = None
         for e in entry:
-            if isinstance(e, basestring):
+            if isinstance(e, str):
                 if 'SSID' in e:
                     try:
                         ssid = e.split(None, 2)[1]
@@ -59,15 +59,15 @@ for entry in build_tree(input):
                         pass
         networks.append((ssid, freq))
 
-print networks
+print(networks)
 
 input = subprocess.check_output('iw dev', shell=True)
 curfreq = None
 noht = None
 for phy in build_tree(input):
-    if not isinstance(phy, basestring):
-        for i in xrange(0, len(phy)):
-            if isinstance(phy[i], basestring) and 'wlan0-ap' in phy[i]:
+    if not isinstance(phy, str):
+        for i in range(0, len(phy)):
+            if isinstance(phy[i], str) and 'wlan0-ap' in phy[i]:
                 try:
                     curfreq = re.search(r'(\d+) [Mm][Hh][Zz]', '\n'.join(phy[i+1])).group(1)
                 except:
@@ -75,7 +75,7 @@ for phy in build_tree(input):
                 noht = re.search(r'[Nn][Oo] HT', '\n'.join(phy[i+1]))
 
 if not curfreq:
-    print 'Could not identify current frequency, trying anyway...'
+    print('Could not identify current frequency, trying anyway...')
 
 targetfreq = None
 for (S, M) in networks:
@@ -84,10 +84,10 @@ for (S, M) in networks:
             targetfreq = M
 
 if not targetfreq:
-    print 'Specified SSID not found. Are you sure it was typed correctly?'
+    print('Specified SSID not found. Are you sure it was typed correctly?')
     sys.exit(1)
 
 if curfreq != targetfreq:
     input = subprocess.check_output('hostapd_cli chan_switch 1 ' + str(targetfreq) + (' ht' if not noht else ''), shell=True)
 
-print '(Target frequency matched.)'
+print('(Target frequency matched.)')

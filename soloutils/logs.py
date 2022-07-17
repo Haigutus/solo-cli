@@ -12,8 +12,8 @@ def main(args):
     os.makedirs('./drone')
     os.makedirs('./controller')
 
-    print 'connecting to Solo...'
-    solo = soloutils.connect_solo(await=True)
+    print('connecting to Solo...')
+    solo = soloutils.connect_solo(wait=True)
     code, stdout, stderr = soloutils.command(solo, 'ls -p /log | grep -v /')
     files = stdout.strip().split()
 
@@ -21,15 +21,15 @@ def main(args):
     scp = SCPClient(solo.get_transport())
     count = 0
     for item in files:
-    	print 'file {} of {}...'.format(count, len(files))
-    	scp.get('/log/' + item)
-    	count += 1
+        print(('file {} of {}...'.format(count, len(files))))
+        scp.get('/log/' + item)
+        count += 1
     os.chdir('..')
 
     solo.close()
 
-    print 'connecting to Controller...'
-    controller = soloutils.connect_controller(await=True)
+    print('connecting to Controller...')
+    controller = soloutils.connect_controller(wait=True)
     code, stdout, stderr = soloutils.command(controller, 'ls -p /log | grep -v /')
     files = stdout.strip().split()
 
@@ -37,11 +37,11 @@ def main(args):
     scp = SCPClient(controller.get_transport())
     count = 0
     for item in files:
-        print 'file {} of {}...'.format(count, len(files))
+        print(('file {} of {}...'.format(count, len(files))))
         scp.get('/log/' + item)
         count += 1
     os.chdir('..')
 
     controller.close()
 
-    print 'logs download complete.'
+    print('logs download complete.')

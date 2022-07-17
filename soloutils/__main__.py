@@ -26,9 +26,12 @@ Options:
 import threading, time
 
 from docopt import docopt
+
 args = docopt(__doc__, version='solo-cli 1.1.2')
 
-import base64, time, sys
+import base64
+import time
+import sys
 import soloutils
 from subprocess import Popen
 import os
@@ -36,7 +39,7 @@ import os
 if args['flash']:
     soloutils.flash.main(args)
 elif args['info']:
-	  soloutils.info.main(args)
+    soloutils.info.main(args)
 elif args['provision']:
     soloutils.provision.main(args)
 elif args['wifi']:
@@ -55,21 +58,21 @@ elif args['video']:
     soloutils.video.main(args)
 elif args['script']:
     if sys.argv[2] == 'pack':
-        print 'checking Internet connectivity...'
+        print('checking Internet connectivity...')
         soloutils.await_net()
         soloutils.pack.main(args)
     elif sys.argv[2] == 'push':
         soloutils.script.push_main(args)
     elif sys.argv[2] == 'run':
         if len(sys.argv) < 4:
-            print 'Usage: solo script run <file.py>'
+            print('Usage: solo script run <file.py>')
             sys.exit(1)
-        
+
         soloutils.script.run_main(args)
     else:
         print('Usage: solo script (pack|push|run)')
         sys.exit(1)
 else:
-    print 'no argument found.'
+    print('no argument found.')
 
 sys.exit(0)

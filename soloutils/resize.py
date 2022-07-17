@@ -83,34 +83,34 @@ exec /tmp/soloutils.sh
 """
 
 def main(args):
-    print 'NOTE: this process requires simultaneous access to'
-    print 'Solo and to the Internet. if you have not yet done so,'
-    print 'run `solo wifi` to connect to Solo and to a local'
-    print 'wifi connection simultaneously.'
-    print ''
-    print 'NOTE: also run `solo install-smart` first.'
-    print ''
+    print('NOTE: this process requires simultaneous access to')
+    print('Solo and to the Internet. if you have not yet done so,')
+    print('run `solo wifi` to connect to Solo and to a local')
+    print('wifi connection simultaneously.')
+    print('')
+    print('NOTE: also run `solo install-smart` first.')
+    print('')
 
     # prompt for consent
-    print 'WARNING: this can break your Solo and require a factory reset!'
-    print 'your Solo will turn off after and you will need to power cycle it.'
-    y = raw_input('proceed to resize filesystem? [y/N] ')
+    print('WARNING: this can break your Solo and require a factory reset!')
+    print('your Solo will turn off after and you will need to power cycle it.')
+    y = eval(input('proceed to resize filesystem? [y/N] '))
     if not (y.lower() == 'y' or y.lower() == 'yes'):
         sys.exit(1)
 
-    print ''
-    print 'connecting to solo...'
-    solo = soloutils.connect_solo(await=True)
+    print('')
+    print('connecting to solo...')
+    solo = soloutils.connect_solo(wait=True)
 
-    print 'waiting for Internet connectivity...'
+    print('waiting for Internet connectivity...')
     soloutils.await_net()
 
-    print ''
+    print('')
     code = soloutils.command_stream(solo, SCRIPT)
 
-    print ''
+    print('')
     dt = datetime.today() + timedelta(minutes=4)
-    print('please wait up to four minutes longer for the resize to complete (at {}).'.format(dt.strftime('%-I:%M')))
+    print(('please wait up to four minutes longer for the resize to complete (at {}).'.format(dt.strftime('%-I:%M'))))
     print('(you can manually restart solo if it fails to come online again.)')
 
     solo.close()

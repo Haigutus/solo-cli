@@ -15,10 +15,10 @@ def push(solo, scp, force):
         localmd5sum = hashlib.md5(open(SCRIPT_FILENAME, 'rb').read()).hexdigest()
         
         if code == 0 and md5sum == localmd5sum:
-            print 'script bundle already up to date.'
+            print('script bundle already up to date.')
             return 0
 
-    print 'uploading script bundle...'
+    print('uploading script bundle...')
     scp.put(SCRIPT_FILENAME, '/tmp')
     return soloutils.command_stream(solo, '''
 set -e
@@ -34,17 +34,17 @@ pip install --no-index -U ./wheelhouse/*.whl
 
 def push_main(args):
     if not os.path.exists(SCRIPT_FILENAME):
-        print 'ERROR: Please run "solo script pack" first to bundle your archive.'
+        print('ERROR: Please run "solo script pack" first to bundle your archive.')
         return 1
 
-    print 'connecting to solo...'
-    solo = soloutils.connect_solo(await=True)
+    print('connecting to solo...')
+    solo = soloutils.connect_solo(wait=True)
     scp = SCPClient(solo.get_transport())
 
     # Requires pip
-    print 'checking pip...'
+    print('checking pip...')
     if soloutils.install_pip.run(solo, scp) != 0:
-        print 'failed installing pip.'
+        print('failed installing pip.')
         sys.exit(1)
 
     # TODO check args['<arg>'] for --force
@@ -56,23 +56,23 @@ def push_main(args):
 
 def run_main(args):
     if not os.path.exists(SCRIPT_FILENAME):
-        print 'ERROR: Please run "solo script pack" first to bundle your archive.'
+        print('ERROR: Please run "solo script pack" first to bundle your archive.')
         return 1
 
-    print 'connecting to solo...'
-    solo = soloutils.connect_solo(await=True)
+    print('connecting to solo...')
+    solo = soloutils.connect_solo(wait=True)
     scp = SCPClient(solo.get_transport())
 
     # Requires pip
-    print 'checking pip...'
+    print('checking pip...')
     if soloutils.install_pip.run(solo, scp) != 0:
-        print 'failed installing pip.'
+        print('failed installing pip.')
         sys.exit(1)
 
     push(solo, scp, '--force' in args['<arg>'])
 
-    print 'running script...'
-    print ''
+    print('running script...')
+    print('')
     soloutils.command_stream(solo, '''
 set -e
 cd /log/solo-script

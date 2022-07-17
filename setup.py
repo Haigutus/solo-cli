@@ -1,7 +1,7 @@
 from setuptools import setup, Extension
 import platform
 
-version = '1.2.0'
+version = '1.3.0'
 
 setup(name='solo-cli',
       version=version,
@@ -23,7 +23,7 @@ setup(name='solo-cli',
                    'Intended Audience :: Science/Research',
                    'License :: OSI Approved :: Apache Software License',
                    'Operating System :: OS Independent',
-                   'Programming Language :: Python :: 2.7',
+                   'Programming Language :: Python :: 3.7',
                    'Topic :: Scientific/Engineering'],
       package_data={
         'soloutils': ['*.sh', 'ssh-config', 'lib/*'],
